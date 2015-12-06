@@ -1,0 +1,19 @@
+{
+  "parser": "babel-eslint",
+  "extends": "eslint:recommended",
+  "env": {
+    "es6": true,
+    "browser": true,
+    "jasmine": true
+  },
+  "ecmaFeatures": {
+    "blockBindings": true,
+    "forOf": true,
+    "modules": true
+  },
+  "globals": {
+    "angular": true,
+    "module": true,
+    "inject": true
+  }
+}

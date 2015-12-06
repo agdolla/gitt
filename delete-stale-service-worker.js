@@ -1,3 +1,4 @@
+/* eslint no-console:0 */
 
 // credit where credit's due
 // ideas/code from:
@@ -12,12 +13,12 @@ var CHECKURL = '/update/';
 function doesRequestAcceptHtml(request) {
   return request.headers.get('Accept')
     .split(',')
-    .some(function(type) { return type === 'text/html'; });
-};
+    .some(type => type === 'text/html');
+}
 
 function cacheOrNetwork(event) {
   return caches.match(event.request)
-  .then(function(response) {
+  .then(response => {
     console.log(event.request);
     if (response) {
       return response;
@@ -25,25 +26,20 @@ function cacheOrNetwork(event) {
 
     var fetchRequest = event.request.clone();
     return fetch(fetchRequest)
-    .then(function(response) {
+    .then(response => {
       if(!response || response.status !== 200 || response.type !== 'basic') {
         return response;
       }
-
       var responseToCache = response.clone();
-
-      caches.open(CACHE_NAME)
-      .then(function(cache) {
-        cache.put(event.request, responseToCache);
-      });
+      caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
       return response;
     });
   });
-};
+}
 
 function getCurrentVersion() {
   return caches.match(VERSIONKEY)
-  .then(function(version) {
+  .then(version => {
     if (version === undefined) {
       return 'initial'; // FIXME find something better :)
     }
@@ -53,7 +49,7 @@ function getCurrentVersion() {
 
 function setCurrentVersion(version) {
   return caches.open(VERSIONKEY)
-  .then(function(cache) {
+  .then(cache => {
     var key = new Request(VERSIONKEY);
     var value = new Response(version);
     return cache.put(key, value);
@@ -62,14 +58,14 @@ function setCurrentVersion(version) {
 
 function needToDelete(key, filenames) {
   console.log(key, filenames);
-  return filenames && filenames.length ? filenames.some(function(filename) { return filename === key; }) : false;
+  return filenames && filenames.length ? filenames.some(filename => filename === key) : false;
 }
 
 function deleteFiles(filenames) {
   return caches.keys()
-  .then(function(keys) {
+  .then(keys => {
     return Promise.all(
-      keys.map(function(key) {
+      keys.map(key => {
         if (needToDelete(key, filenames)) {
           console.log('deleting', key);
           return caches.delete(key);
@@ -77,15 +73,15 @@ function deleteFiles(filenames) {
       })
     );
   });
-};
+}
 
 function validateCache() {
-  return new Promise(function(resolve) {
+  return new Promise(resolve => {
     getCurrentVersion()
-    .then(function(version) {
+    .then(version => {
       fetch(CHECKURL + version + '.json' + '?'+Math.random())
-      .then(function(response) { return response.json() })
-      .then(function(json) {
+      .then(response => response.json())
+      .then(json => {
         if (version === json.version) {
           return resolve();
         }
@@ -101,16 +97,14 @@ function handleEvent(event) {
   var isRootRequest = url.host === self.location.host;
   if (isRootRequest && doesRequestAcceptHtml(request)) {
     return validateCache()
-    .then(function() {
-      return cacheOrNetwork(event)
-    });
+    .then(() => cacheOrNetwork(event));
   }
   else {
     return cacheOrNetwork(event);
   }
 }
 
-this.addEventListener('fetch', function (event) {
+this.addEventListener('fetch', event => {
   event.respondWith(
     handleEvent(event)
   );
