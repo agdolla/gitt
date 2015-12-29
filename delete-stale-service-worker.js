@@ -31,7 +31,8 @@ function cacheOrNetwork(event) {
         return response;
       }
       var responseToCache = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+      caches.open(CACHE_NAME)
+      .then(cache => cache.put(event.request, responseToCache));
       return response;
     });
   });
@@ -79,7 +80,7 @@ function validateCache() {
   return new Promise(resolve => {
     getCurrentVersion()
     .then(version => {
-      fetch(CHECKURL + version + '.json' + '?'+Math.random())
+      fetch(CHECKURL + version + '.json' + '?' + Math.random())
       .then(response => response.json())
       .then(json => {
         if (version === json.version) {
